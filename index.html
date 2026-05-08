@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ระบบบันทึกข้อมูลตรวจสุขภาพช่องปาก</title>
+<style>
+:root{
+--blue:#1f8fbd;--dark:#1b6282;--green:#27ae60;--orange:#f39c12;--red:#e74c3c;--bg:#eef6fa;--card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:#234}
+.header{max-width:1180px;margin:20px auto 12px;background:linear-gradient(135deg,#1686b5,#0d658e);border-radius:22px;padding:24px 28px;color:white;display:flex;gap:20px;align-items:center;justify-content:space-between;box-shadow:0 10px 25px rgba(0,0,0,.12)}
+.logo{width:82px;height:82px;border-radius:22px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:42px}
+.header h1{margin:0;font-size:30px}
+.header p{margin:8px 0 0;line-height:1.6}
+.badge{background:rgba(255,255,255,.18);padding:16px;border-radius:18px;text-align:center;min-width:150px}
+.wrap{max-width:1180px;margin:auto;padding:0 14px 30px}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;background:white;padding:12px;border-radius:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);margin-bottom:16px}
+.nav button{border:0;border-radius:14px;padding:18px 10px;background:#f3f7f9;font-weight:bold;color:#456;cursor:pointer}
+.nav button.active{background:var(--blue);color:white}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border-radius:20px;padding:22px;box-shadow:0 6px 18px rgba(0,0,0,.07);margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.stat{border-radius:18px;padding:20px;text-align:center;background:#f7fbfd;border:1px solid #e1eef4}
+.stat strong{font-size:34px;color:var(--blue);display:block;margin-top:8px}
+h2{margin-top:0;color:#166d92}
+label{font-weight:bold;display:block;margin-top:10px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d4e1e8;border-radius:12px;margin-top:6px;font-size:15px;background:white}
+textarea{min-height:90px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{border:0;border-radius:12px;padding:12px 18px;color:white;background:var(--blue);cursor:pointer;font-weight:bold}
+.btn.green{background:var(--green)}.btn.orange{background:var(--orange)}.btn.red{background:var(--red)}.btn.gray{background:#657786}
+table{width:100%;border-collapse:collapse;background:white;border-radius:14px;overflow:hidden}
+th,td{padding:12px;border-bottom:1px solid #edf2f5;text-align:left;vertical-align:top}
+th{background:#dff1f8;color:#145e7c}
+.notice{padding:14px;border-radius:14px;background:#fff9e8;border-left:5px solid var(--orange);line-height:1.7}
+.report{border:2px solid #d5eaf2;border-radius:18px;padding:18px;background:#fff}
+.report h3{text-align:center;margin:0 0 12px;color:#145e7c}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.checks label{font-weight:normal;background:#f7fbfd;border:1px solid #e2edf2;border-radius:12px;padding:10px}
+.mediaBox{border:2px dashed #b7d9e8;border-radius:18px;padding:20px;background:#f8fcfe;text-align:center}
+.preview img,.preview video{max-width:220px;max-height:150px;border-radius:12px;margin:8px}
+.footer{text-align:center;color:#789;padding:20px}
+@media(max-width:720px){
+.header{flex-direction:column;text-align:center;margin:10px;border-radius:18px}.header h1{font-size:23px}
+.nav{grid-template-columns:1fr 1fr}.nav button{padding:14px 8px}
+.card{padding:16px}.wrap{padding:0 10px 20px}th,td{font-size:13px;padding:8px}
+}
+@media print{.nav,.actions,.footer,.mediaBox{display:none}.card{box-shadow:none}.page{display:block}.header{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">🦷</div>
+  <div style="flex:1">
+    <h1>ระบบบันทึกข้อมูลตรวจสุขภาพช่องปาก</h1>
+    <p>กลุ่มงานทันตกรรม โรงพยาบาลหางดง • สำหรับโรงเรียน / ศูนย์เด็กเล็ก / หน่วยทันตกรรมเคลื่อนที่</p>
+  </div>
+  <div class="badge">Dental Screening<br/>System</div>
+</div>
+
+<div class="wrap">
+  <div class="nav">
+    <button class="active" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button onclick="showPage('form',this)">ฟอร์มบันทึกผล</button>
+    <button onclick="showPage('list',this)">รายการข้อมูล</button>
+    <button onclick="showPage('parent',this)">ใบแจ้งผู้ปกครอง</button>
+    <button onclick="showPage('cavity',this)">โรงเรียนต้นแบบ Cavity Free</button>
+  </div>
+
+  <section id="dashboard" class="page active">
+    <div class="grid">
+      <div class="stat">นักเรียนทั้งหมด<strong id="sTotal">0</strong></div>
+      <div class="stat">คนไทย<strong id="sThai">0</strong></div>
+      <div class="stat">ต่างชาติ<strong id="sForeign">0</strong></div>
+      <div class="stat">ฟันดี<strong id="sGood">0</strong></div>
+      <div class="stat">ฟันผุ/ต้องดูแล<strong id="sBad">0</strong></div>
+    </div>
+    <div class="card">
+      <h2>สรุปทั้งโรงเรียน</h2>
+      <div class="notice">ระบบนี้บันทึกข้อมูลไว้ในเครื่อง/เบราว์เซอร์ที่ใช้งานอยู่ เหมาะสำหรับทดลองและใช้งานภาคสนามเบื้องต้น หากต้องการฐานข้อมูลกลางสามารถพัฒนาต่อเป็น Google Sheet หรือ Firebase ได้</div>
+    </div>
+  </section>
+
+  <section id="form" class="page">
+    <div class="card">
+      <h2>แบบบันทึกข้อมูลการตรวจสุขภาพช่องปาก</h2>
+      <div class="row">
+        <div><label>โรงเรียน / ศูนย์เด็กเล็ก</label><input id="school" placeholder="เช่น ศูนย์เด็กเล็กบ้าน..."></div>
+        <div><label>วันที่ตรวจ</label><input id="date" type="date"></div>
+      </div>
+      <div class="row">
+        <div><label>ชื่อ - สกุลนักเรียน</label><input id="name"></div>
+        <div><label>อายุ</label><input id="age" type="number"></div>
+        <div><label>สัญชาติ</label><select id="nation"><option>ไทย</option><option>ต่างชาติ</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>ผลตรวจ</label><select id="result"><option>ฟันดี</option><option>ฟันผุ</option><option>มีหินปูน/เหงือกอักเสบ</option><option>ต้องส่งต่อรักษา</option></select></div>
+        <div><label>ระดับความเร่งด่วน</label><select id="urgent"><option>เฝ้าระวัง</option><option>นัดติดตาม</option><option>ส่งต่อทันตกรรม</option></select></div>
+      </div>
+      <label>คำแนะนำ / หมายเหตุ</label><textarea id="note" placeholder="เช่น แปรงฟันเช้า-ก่อนนอน ลดขนมหวาน พบทันตแพทย์..."></textarea>
+      <div class="actions">
+        <button class="btn green" onclick="saveStudent()">บันทึกข้อมูล</button>
+        <button class="btn gray" onclick="clearForm()">ล้างฟอร์ม</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="list" class="page">
+    <div class="card">
+      <h2>รายการข้อมูลที่บันทึก</h2>
+      <div class="actions">
+        <button class="btn" onclick="downloadCSV()">ดาวน์โหลด CSV</button>
+        <button class="btn red" onclick="clearAll()">ลบข้อมูลทั้งหมด</button>
+      </div>
+      <div style="overflow:auto;margin-top:12px">
+        <table id="studentTable"></table>
+      </div>
+    </div>
+  </section>
+
+  <section id="parent" class="page">
+    <div class="card">
+      <h2>ใบแจ้งผลผู้ปกครอง</h2>
+      <label>เลือกนักเรียน</label><select id="selectStudent" onchange="renderReport()"></select>
+      <div class="actions"><button class="btn" onclick="window.print()">พิมพ์ใบแจ้งผล</button></div>
+      <div class="report" id="reportBox">
+        <h3>ใบแจ้งผลการตรวจสุขภาพช่องปาก</h3>
+        <p>กรุณาเลือกนักเรียนเพื่อแสดงใบแจ้งผล</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cavity" class="page">
+    <div class="card">
+      <h2>แบบบันทึกกิจกรรมโรงเรียนต้นแบบ Cavity Free / Caries Free เด็กอายุ 3 ปี</h2>
+      <div class="row">
+        <div><label>ปีการศึกษา</label><input id="cfYear" value="2569"></div>
+        <div><label>โรงเรียน / ศูนย์เด็กเล็ก</label><input id="cfSchool"></div>
+      </div>
+      <h3>พฤติกรรมและกิจกรรมส่งเสริมสุขภาพช่องปาก</h3>
+      <div class="checks">
+        <label><input type="checkbox"> แปรงฟันหลังอาหารกลางวัน</label>
+        <label><input type="checkbox"> ใช้ยาสีฟันผสมฟลูออไรด์</label>
+        <label><input type="checkbox"> งดขวดนมก่อนนอน</label>
+        <label><input type="checkbox"> ลดขนมหวาน/น้ำหวาน</label>
+        <label><input type="checkbox"> ตรวจฟันเด็กอายุ 3 ปี</label>
+        <label><input type="checkbox"> ส่งต่อรักษาเมื่อพบปัญหา</label>
+      </div>
+      <label>ความถี่การแปรงฟัน</label>
+      <select><option>1-3 วัน/สัปดาห์</option><option>4-6 วัน/สัปดาห์</option><option>ทุกวัน</option></select>
+      <label>รายละเอียดกิจกรรม</label><textarea placeholder="บันทึกรายละเอียดกิจกรรมส่งเสริมสุขภาพช่องปาก"></textarea>
+      <div class="mediaBox">
+        <p>เพิ่มรูปภาพ / วิดีโอกิจกรรม</p>
+        <input type="file" accept="image/*,video/*" multiple onchange="previewFiles(event)">
+        <div class="preview" id="preview"></div>
+      </div>
+      <div class="actions">
+        <button class="btn green" onclick="alert('บันทึกกิจกรรมเรียบร้อย')">บันทึกแบบบันทึก</button>
+        <button class="btn" onclick="window.print()">พิมพ์แบบบันทึก</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="footer">Dental Screening System • Hang Dong Hospital</div>
+
+<script>
+let students = JSON.parse(localStorage.getItem('students') || '[]');
+document.getElementById('date').valueAsDate = new Date();
+
+function showPage(id,btn){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+renderAll();
+}
+function saveStudent(){
+const data={
+school:school.value,date:date.value,name:name.value.trim(),age:age.value,nation:nation.value,
+result:result.value,urgent:urgent.value,note:note.value
+};
+if(!data.name){alert('กรุณากรอกชื่อ - สกุลนักเรียน');return}
+students.push(data);localStorage.setItem('students',JSON.stringify(students));
+alert('บันทึกข้อมูลสำเร็จ');clearForm();renderAll();
+}
+function clearForm(){name.value='';age.value='';note.value='';}
+function renderAll(){renderStats();renderTable();renderSelect();renderReport();}
+function renderStats(){
+sTotal.innerText=students.length;
+sThai.innerText=students.filter(x=>x.nation==='ไทย').length;
+sForeign.innerText=students.filter(x=>x.nation==='ต่างชาติ').length;
+sGood.innerText=students.filter(x=>x.result==='ฟันดี').length;
+sBad.innerText=students.filter(x=>x.result!=='ฟันดี').length;
+}
+function renderTable(){
+let html='<tr><th>วันที่</th><th>โรงเรียน</th><th>ชื่อ</th><th>อายุ</th><th>สัญชาติ</th><th>ผลตรวจ</th><th>การจัดการ</th></tr>';
+students.forEach((s,i)=>html+=`<tr><td>${s.date||''}</td><td>${s.school||''}</td><td>${s.name}</td><td>${s.age||''}</td><td>${s.nation}</td><td>${s.result}</td><td><button class="btn red" onclick="deleteOne(${i})">ลบ</button></td></tr>`);
+studentTable.innerHTML=html;
+}
+function renderSelect(){
+selectStudent.innerHTML='<option value="">-- เลือกนักเรียน --</option>'+students.map((s,i)=>`<option value="${i}">${s.name} (${s.result})</option>`).join('');
+}
+function renderReport(){
+const i=selectStudent.value;if(i===''){reportBox.innerHTML='<h3>ใบแจ้งผลการตรวจสุขภาพช่องปาก</h3><p>กรุณาเลือกนักเรียนเพื่อแสดงใบแจ้งผล</p>';return}
+const s=students[i];
+reportBox.innerHTML=`<h3>ใบแจ้งผลการตรวจสุขภาพช่องปาก</h3>
+<p><b>โรงเรียน:</b> ${s.school||'-'} &nbsp; <b>วันที่ตรวจ:</b> ${s.date||'-'}</p>
+<p><b>ชื่อนักเรียน:</b> ${s.name} &nbsp; <b>อายุ:</b> ${s.age||'-'} ปี &nbsp; <b>สัญชาติ:</b> ${s.nation}</p>
+<p><b>ผลการตรวจ:</b> ${s.result}</p>
+<p><b>คำแนะนำ:</b> ${s.note||'แปรงฟันอย่างน้อยวันละ 2 ครั้ง ลดขนมหวาน และพบทันตบุคลากรตามนัด'}</p>
+<p><b>การนัดหมาย/ส่งต่อ:</b> ${s.urgent}</p>
+<hr><p>ลงชื่อ ........................................ เจ้าหน้าที่ทันตกรรม</p>`;
+}
+function deleteOne(i){if(confirm('ลบข้อมูลรายการนี้?')){students.splice(i,1);localStorage.setItem('students',JSON.stringify(students));renderAll();}}
+function clearAll(){if(confirm('ต้องการลบข้อมูลทั้งหมดใช่ไหม?')){students=[];localStorage.removeItem('students');renderAll();}}
+function downloadCSV(){
+const rows=[['date','school','name','age','nation','result','urgent','note'],...students.map(s=>[s.date,s.school,s.name,s.age,s.nation,s.result,s.urgent,s.note])];
+const csv=rows.map(r=>r.map(v=>`"${String(v||'').replaceAll('"','""')}"`).join(',')).join('\n');
+const blob=new Blob(["\ufeff"+csv],{type:'text/csv;charset=utf-8'});
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dental-screening.csv';a.click();
+}
+function previewFiles(e){
+preview.innerHTML='';
+[...e.target.files].forEach(f=>{
+const url=URL.createObjectURL(f);
+if(f.type.startsWith('video')) preview.innerHTML+=`<video src="${url}" controls></video>`;
+else preview.innerHTML+=`<img src="${url}">`;
+});
+}
+renderAll();
+</script>
+</body>
+</html>
